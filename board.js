@@ -99,14 +99,15 @@ TetrisBoard.prototype.collides = function (dir) {
 }
 
 // checks if the current piece will collide with something if rotated
-TetrisBoard.prototype.collidesIfRotates = function () {
+TetrisBoard.prototype.collidesIfRotates = function (newPiece) {
+  
   // if this move would put the piece off the board
-  if (newSpot[1] + this.currPiece.height > this.height || newSpot[0] + this.currPiece.width > this.width || newSpot[0] < 0) {
+  if (this.currPieceLoc[1] + newPiece.height > this.height || this.currPieceLoc[0] + newPiece.width > this.width || this.currPieceLoc[0] < 0) {
     return true;
   } else {
-    for (var i = 0; i < this.currPiece.occupied.length; i++) {
+    for (var i = 0; i < newPiece.occupied.length; i++) {
       // if this move would collide this piece with an already-placed piece
-      if (this.board[newSpot[1] + this.currPiece.occupied[i][1]][newSpot[0] + this.currPiece.occupied[i][0]] !== 'empty') {
+      if (this.board[this.currPieceLoc[1] + newPiece.occupied[i][1]][this.currPieceLoc[0] + newPiece.occupied[i][0]] !== 'empty') {
         return true;
       }
     }
@@ -114,9 +115,53 @@ TetrisBoard.prototype.collidesIfRotates = function () {
   }
 }
 
-// rotates the current piece
-TetrisBoard.prototype.rotatePiece = function (dir) {
+// tries to rotate the current piece
+TetrisBoard.prototype.tryRotate = function () {
+  var newRotation = null;
+  if (this.currPiece instanceof I) {
+    newRotation = new I2();
+  } else if (this.currPiece instanceof I2) {
+    newRotation = new I();
+  } else if (this.currPiece instanceof O) {
+    newRotation = this.currPiece;
+  } else if (this.currPiece instanceof T) {
+    newRotation = new T2();
+  } else if (this.currPiece instanceof T2) {
+    newRotation = new T3();
+  } else if (this.currPiece instanceof T3) {
+    newRotation = new T4();
+  } else if (this.currPiece instanceof T4) {
+    newRotation = new T();
+  } else if (this.currPiece instanceof S) {
+    newRotation = new S2();
+  } else if (this.currPiece instanceof S2) {
+    newRotation = new S();
+  } else if (this.currPiece instanceof Z) {
+    newRotation = new Z2();
+  } else if (this.currPiece instanceof Z2) {
+    newRotation = new Z();
+  } else if (this.currPiece instanceof J) {
+    newRotation = new J2();
+  } else if (this.currPiece instanceof J2) {
+    newRotation = new J3();
+  } else if (this.currPiece instanceof J3) {
+    newRotation = new J4();
+  } else if (this.currPiece instanceof J4) {
+    newRotation = new J();
+  } else if (this.currPiece instanceof L) {
+    newRotation = new L2();
+  } else if (this.currPiece instanceof L2) {
+    newRotation = new L3();
+  } else if (this.currPiece instanceof L3) {
+    newRotation = new L4();
+  } else if (this.currPiece instanceof L4) {
+    newRotation = new L();
+  }
   
+  if (!this.collidesIfRotates(newRotation)) {
+    this.currPiece = newRotation;
+    this.renderBoard();
+  }
 }
 
 // moves the current piece
@@ -139,6 +184,8 @@ TetrisBoard.prototype.move = function (dir) {
 }
 
 // fixes the current piece to the board, gets a new current piece
+// this method is also responsible for triggering the functions that check for full rows and blocks over the top
+// (because those events will only happen when a piece is fixed to the board)
 TetrisBoard.prototype.fixCurrPiece = function () {
   //console.log('piece fixed');
   
@@ -227,7 +274,7 @@ TetrisBoard.prototype.resetBoard = function () {
 TetrisBoard.prototype.setupKeyboardListener = function () {
   var board = this;
   $(window).keypress(function (e) {
-    console.log('keypress: ' + e.which);
+    //console.log('keypress: ' + e.which);
     if (e.which === 97) { // 'a'
       if (!board.collides('left')) {
         board.move('left');
@@ -250,9 +297,7 @@ TetrisBoard.prototype.setupKeyboardListener = function () {
     } else if (e.which === 101) { // 'e'
       
     } else if (e.which === 114) { // 'r'
-      if (!board.collidesIfRotates()) {
-        board.rotatePiece();
-      }
+      board.tryRotate();
     }
   });
 }
