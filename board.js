@@ -98,6 +98,27 @@ TetrisBoard.prototype.collides = function (dir) {
   }
 }
 
+// checks if the current piece will collide with something if rotated
+TetrisBoard.prototype.collidesIfRotates = function () {
+  // if this move would put the piece off the board
+  if (newSpot[1] + this.currPiece.height > this.height || newSpot[0] + this.currPiece.width > this.width || newSpot[0] < 0) {
+    return true;
+  } else {
+    for (var i = 0; i < this.currPiece.occupied.length; i++) {
+      // if this move would collide this piece with an already-placed piece
+      if (this.board[newSpot[1] + this.currPiece.occupied[i][1]][newSpot[0] + this.currPiece.occupied[i][0]] !== 'empty') {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+// rotates the current piece
+TetrisBoard.prototype.rotatePiece = function (dir) {
+  
+}
+
 // moves the current piece
 TetrisBoard.prototype.move = function (dir) {
   switch (dir) {
@@ -229,7 +250,9 @@ TetrisBoard.prototype.setupKeyboardListener = function () {
     } else if (e.which === 101) { // 'e'
       
     } else if (e.which === 114) { // 'r'
-      
+      if (!board.collidesIfRotates()) {
+        board.rotatePiece();
+      }
     }
   });
 }
